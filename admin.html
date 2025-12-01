@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <style>
+    body { font-family: Arial; text-align: center; background-color: #ffe0b2; }
+    input, button { padding: 10px; margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Admin Page</h1>
+  <p>Only you can add books and upload pages.</p>
+
+  <form id="addBookForm">
+    <input type="text" placeholder="Book Title" name="title" required><br>
+    <input type="text" placeholder="Cover Image URL" name="cover" required><br>
+    <input type="text" placeholder="Book Pages JSON" name="pages"><br>
+    <input type="text" placeholder="Price (optional)" name="price"><br>
+    <button type="submit">Add Book</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('addBookForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Book added! (Connect this to server later)');
+    });
+  </script>
+</body>
+</html>

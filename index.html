@@ -1,229 +1,43 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Books — Gallery</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#f3f6fb; --card:#ffffff; --muted:#6b7280; --accent:#6c5ce7; --radius:12px}
-    *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(180deg,var(--bg),#eef2ff);color:#111}
-    .wrap{max-width:1100px;margin:28px auto;padding:20px}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-    h1{margin:0;font-size:22px}
-    .muted{color:var(--muted);font-size:13px}
-    .controls{display:flex;gap:8px;align-items:center}
-    button{background:var(--accent);color:white;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
-    .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 8px 30px rgba(20,20,60,.06)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:16px}
-    .book{cursor:pointer;overflow:hidden;border-radius:10px}
-    .cover{height:260px;background:#eee;display:flex;align-items:end;justify-content:center;padding:12px;color:white;font-weight:600;background-size:cover;background-position:center}
-    .meta{padding:8px}
-    .title{font-weight:600}
-    .author{color:var(--muted);font-size:13px}
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px}
-    .modal.open{display:flex;background:rgba(8,10,22,.5)}
-    .reader{width:100%;max-width:900px;background:white;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
-    .reader .toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #f1f3f8}
-    .reader .page{height:70vh;display:flex;align-items:center;justify-content:center;background:#111;color:white}
-    .reader img{max-width:100%;max-height:100%}
-    .reader .nav{display:flex;gap:8px}
-    .small{font-size:13px;color:var(--muted)}
-    form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    form .full{grid-column:1/-1}
-    input,textarea,select{padding:10px;border-radius:8px;border:1px solid #e7e9f0}
-    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-    footer{margin-top:18px;text-align:center;color:var(--muted)}
-    @media (max-width:700px){.cover{height:180px}.reader .page{height:60vh}.wrap{padding:12px} form{grid-template-columns:1fr}}
-  </style>
+  <title>Britham</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>My Book Gallery</h1>
-        <div class="muted">Click a cover to open the reader. Only you (admin) can add books.</div>
-      </div>
-      <div class="controls">
-        <label class="small">Theme</label>
-        <select id="themeSelect" aria-label="Theme chooser">
-          <option value="--accent:#6c5ce7;--bg:#f3f6fb">Purple</option>
-          <option value="--accent:#ef4444;--bg:#fff7f7">Red</option>
-          <option value="--accent:#0ea5a4;--bg:#f0fdfa">Teal</option>
-          <option value="--accent:#f59e0b;--bg:#fffaf0">Amber</option>
-        </select>
-        <button id="refreshBtn">Refresh</button>
-      </div>
-    </header>
+  <h1>BRITHAM BOOKS</h1>
 
-    <section class="card">
-      <strong>Add a book (admin only)</strong>
-      <p class="muted">Provide a cover image URL and either a single "link" (PDF or page) OR comma-separated page image URLs for the built-in reader swipe experience.</p>
+  <!-- Google Sign-In Button -->
+  <div id="g_id_onload"
+       data-client_id="480444034890-ipdiocvg86et5mfp8ufvrdaq7gad8982.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
 
-      <div style="margin-top:8px" class="muted">Admin password (keeps posting private):</div>
-      <input id="adminPass" type="password" placeholder="Admin password" />
-
-      <form id="bookForm">
-        <div>
-          <label>Title</label>
-          <input id="title" placeholder="Book title" />
-        </div>
-        <div>
-          <label>Author</label>
-          <input id="author" placeholder="Author" />
-        </div>
-        <div class="full">
-          <label>Cover image URL</label>
-          <input id="cover" placeholder="https://.../cover.jpg" />
-        </div>
-        <div class="full">
-          <label>Pages (optional)</label>
-          <textarea id="pages" placeholder="Comma-separated image URLs for pages"></textarea>
-        </div>
-        <div class="full">
-          <label>External link (optional)</label>
-          <input id="link" placeholder="https://... (used if you don't provide pages)" />
-        </div>
-
-        <div class="full" style="display:flex;gap:8px">
-          <button id="addBtn" type="button">Add book</button>
-          <button id="clearForm" type="button">Clear</button>
-          <div id="status" class="muted" style="align-self:center"></div>
-        </div>
-      </form>
-    </section>
-
-    <section style="margin-top:12px">
-      <div class="card">
-        <strong>Book gallery</strong>
-        <div id="grid" class="grid" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <footer>To publish this site to the world you can deploy to services like Render, Vercel or Railway.</footer>
-
-    <div id="modal" class="modal" role="dialog" aria-hidden="true">
-      <div class="reader" role="document">
-        <div class="toolbar">
-          <div>
-            <button id="closeBtn">Close</button>
-            <span id="readerTitle" style="margin-left:12px;font-weight:600"></span>
-            <div id="readerAuthor" class="small" style="margin-left:8px"></div>
-          </div>
-          <div class="nav">
-            <button id="prevBtn">Prev</button>
-            <button id="nextBtn">Next</button>
-            <div class="small" id="pageCounter"></div>
-          </div>
-        </div>
-        <div class="page" id="pageArea">Loading...</div>
-      </div>
+  <!-- Book Gallery (hidden until login) -->
+  <div class="gallery" id="bookGallery" style="display:none;">
+    <div class="book" onclick="openBook('book1.html')">
+      <img src="images/Finding Yourself.png" alt="Book 1 cover">
+      <div class="Finding Yourself">Book 1</div>
+    </div>
+    <div class="book" onclick="openBook('book2.html')">
+      <img src="book2-cover.jpg" alt="Book 2">
+      <div class="book-title">Book 2</div>
     </div>
   </div>
 
   <script>
-    const el = id => document.getElementById(id);
-
-    // Theme selector
-    const themeSelect = el('themeSelect');
-    themeSelect.addEventListener('change', ()=>{ document.documentElement.style.cssText = themeSelect.value });
-
-    // Load books from server
-    async function loadBooks(){
-      const grid = el('grid'); grid.innerHTML='Loading...';
-      try{
-        const res = await fetch('/books');
-        if(!res.ok) throw new Error('fetch');
-        const books = await res.json();
-        grid.innerHTML = books.length ? books.map(b => bookCard(b)).join('') : '<div class="muted">No books yet.</div>';
-        document.querySelectorAll('.book').forEach(node=>{
-          node.addEventListener('click', ()=>openReader(node.dataset.id));
-        });
-      }catch(e){ grid.innerHTML = '<div class="muted">Could not load books. Is the server running?</div>' }
+    // Show gallery after Google Sign-In
+    function handleCredentialResponse(response) {
+      console.log("Encoded JWT ID token: " + response.credential);
+      document.getElementById('bookGallery').style.display = 'flex';
     }
 
-    function bookCard(b){
-      const cover = b.cover || '';
-      const title = escapeHtml(b.title||'Untitled');
-      const author = escapeHtml(b.author||'');
-      return `<div class="card book" data-id="${b.id}">`+
-             `<div class="cover" style="background-image:url('${escapeAttr(cover)}')">${!cover?'<div style="padding:12px">No cover</div>':''}</div>`+
-             `<div class="meta"><div class="title">${title}</div><div class="author">${author}</div></div></div>`;
+    function openBook(bookPage) {
+      window.location.href = bookPage;
     }
-
-    function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-    function escapeAttr(s){ return s? s.replace(/\"/g,'&quot;') : '' }
-
-    // Reader modal
-    let currentBook = null;
-    let currentPage = 0;
-    const modal = el('modal');
-    const pageArea = el('pageArea');
-    const pageCounter = el('pageCounter');
-
-    async function openReader(id){
-      const res = await fetch('/books');
-      const books = await res.json().catch(()=>[]);
-      const b = books.find(x=>String(x.id)===String(id));
-      if(!b) return alert('Book not found');
-      currentBook = b; currentPage = 0;
-      el('readerTitle').textContent = b.title || '';
-      el('readerAuthor').textContent = b.author || '';
-      modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
-      renderPage();
-    }
-
-    function renderPage(){
-      if(!currentBook) return;
-      const pages = Array.isArray(currentBook.pages) && currentBook.pages.length ? currentBook.pages : [];
-      if(pages.length){
-        const url = pages[currentPage];
-        pageArea.innerHTML = `<img src="${escapeAttr(url)}" alt="Page ${currentPage+1}" />`;
-        pageCounter.textContent = `${currentPage+1} / ${pages.length}`;
-      }else if(currentBook.link){
-        pageArea.innerHTML = `<iframe src="${escapeAttr(currentBook.link)}" style="width:100%;height:100%;border:0"></iframe>`;
-        pageCounter.textContent = 'External link';
-      }else{
-        pageArea.innerHTML = `<div class="muted">No pages or link available.</div>`;
-        pageCounter.textContent = '';
-      }
-    }
-
-    el('prevBtn').addEventListener('click', ()=>{ if(currentBook?.pages?.length>0 && currentPage>0){ currentPage--; renderPage(); } });
-    el('nextBtn').addEventListener('click', ()=>{ if(currentBook?.pages?.length>0 && currentPage<currentBook.pages.length-1){ currentPage++; renderPage(); } });
-    el('closeBtn').addEventListener('click', ()=>{ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); currentBook=null });
-
-    // Add book (admin)
-    el('addBtn').addEventListener('click', async ()=>{
-      const password = el('adminPass').value.trim();
-      const title = el('title').value.trim();
-      const author = el('author').value.trim();
-      const cover = el('cover').value.trim();
-      const pagesText = el('pages').value.trim();
-      const link = el('link').value.trim();
-      if(!password){ el('status').textContent = 'Admin password required'; return }
-      if(!title){ el('status').textContent = 'Title required'; return }
-      const pages = pagesText ? pagesText.split(',').map(s=>s.trim()).filter(Boolean) : [];
-      el('status').textContent = 'Posting...';
-      try{
-        const res = await fetch('/books', {
-          method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+password},
-          body: JSON.stringify({ title, author, cover, pages, link })
-        });
-        const json = await res.json().catch(()=>({}));
-        if(res.ok){ el('status').textContent = 'Book added'; el('bookForm').reset(); loadBooks() }
-        else el('status').textContent = json.error || ('Error '+res.status);
-      }catch(e){ el('status').textContent = 'Network error' }
-    });
-
-    el('clearForm').addEventListener('click', ()=>{ el('bookForm').reset(); el('status').textContent=''; });
-    el('refreshBtn').addEventListener('click', loadBooks);
-
-    // Initial load
-    loadBooks();
   </script>
 </body>
 </html>
